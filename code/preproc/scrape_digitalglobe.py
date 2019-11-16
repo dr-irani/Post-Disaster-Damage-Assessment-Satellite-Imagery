@@ -2,6 +2,7 @@ import argparse
 import os
 import requests
 from urllib.parse import urlparse
+from urllib.request import urlretrieve
 from collections import defaultdict
 from bs4 import BeautifulSoup
 
@@ -9,6 +10,7 @@ from bs4 import BeautifulSoup
 def get_args():
     parser = argparse.ArgumentParser(description="Scrape GeoTIFF images from DigitalGlobe.")
     parser.add_argument('event_url', metavar='link to event on DigitalGlobe', type=str)
+    parser.add_argument('disaster_name', help='specify name of disaster to create output folder')
     parser.add_argument('--download', metavar='testing file', default=False, type=bool)
     args = parser.parse_args()
     return args
@@ -43,12 +45,93 @@ def get_img_by_date(links):
     return pre_events, post_events
 
 
+def compress_tif(original_tif, compression_method="JPEG",
+                 predictors=2, new_directory="compressed/"):
+    """
+    This function takes an uncompressed GeoTIFF and compresses it with one of
+    four compression methods:
+
+        - Packbits
+        - JPEG
+        - Deflate
+        - LZW
+
+    For LZW and Deflate, you can choose the number of predictors.
+
+    :param original_tif: The uncompressed GeoTIFF to be compressed
+    :param new_tif: The new compressed GeoTIFF
+    :param compression_method: Packbits, JPEG, Deflate, or LZW
+    :param predictors: Default is 2
+    :return: Creates a new compressed TIF in directory folder
+    """
+
+    new_tif_base = original_tif.split('.')[0]
+    packbit_base = "_packbit_compressed.tif"
+    jpeg_base = "_jpeg_compressed.tif"
+    deflate_base = "_deflate_compressed.tif"
+    lzw_base = "_lzw_compressed.tif"
+
+    command_packbits = "gdal_translate -of GTiff-co COMPRESS=PACKBITS -co\
+     TILED=YES " + original_tif + " " + new_tif_base + packbit_base
+    command_jpeg = "gdal_translate -co COMPRESS=JPEG -co TILED=YES " + original_tif + " " + new_tif_base + jpeg_base
+    command_deflate = "gdal_translate -of GTiff -co COMPRESS=DEFLATE -co\
+     PREDICTOR=" + str(predictors) + " -co TILED=YES " + original_tif + " " + new_tif_base + deflate_base
+    command_lzw = "gdal_translate -of GTiff -co COMPRESS=LZW -co PREDICTOR=" + str(predictors) + " -co TILED=YES " + original_tif + " " + new_tif_base + lzw_base
+
+    command_rm = "rm " + original_tif
+
+    if compression_method == "JPEG":
+        os.system(command_jpeg)
+        os.system(command_rm)
+    elif compression_method == "Packbits":
+        os.system(command_packbits)
+        os.system(command_rm)
+    elif compression_method == "Deflate":
+        os.system(command_deflate)
+        os.system(command_rm)
+    elif compression_method == "LZW":
+        os.system(command_lzw)
+        os.system(command_rm)
+
+
+# def download_images()
+
+
+def retrieve_images(events, overwrite_if_exists=False):
+    # import pdb; pdb.set_trace()
+    for date, urls in events.items():
+        if not os.path.isdir('%s' % date):
+            os.mkdir('%s' % date)
+        os.chdir('%s' % date)
+        print('Downloading images from {}'.format(date))
+        for i, url in enumerate(urls):
+            filename = url[url.rfind("/")+1:]
+            # import pdb; pdb.set_trace()
+            compressed_file_name = filename.split('.')[0] + '_jpeg_compressed.tif'
+            if overwrite_if_exists or not os.path.isfile(compressed_file_name):
+                urlretrieve(url, filename)
+                print('downloaded file: {}'.format(filename))
+                compress_tif(os.path.join(os.getcwd(), filename))
+                print('compressed file: {}'.format(filename))
+        os.chdir('..')
+        # import pdb; pdb.set_trace()
+        
+
+
+    # for fileUrl in urls:
+    #     filename = fileUrl[fileUrl.rfind("/")+1:]
+    #     if overwrite_if_exists or not os.path.isfile(filename):
+    #         urllib.request.urlretrieve(fileUrl, filename)
+    #         print('downloaded file: {}'.format(filename))
+
+
 def main():
     args = get_args()
     links = get_img_links(os.path.join(args.event_url))
     pre_events, post_events = get_img_by_date(links)
-    
-    import pdb; pdb.set_trace()
+    os.chdir('/Volumes/ExtremeSSD/cs461_final_project/data/disaster_images/pre_event')
+    retrieve_images(pre_events)
+
 
 
 if __name__ == "__main__":
