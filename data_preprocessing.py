@@ -11,15 +11,28 @@ from torch.utils.data import Dataset, DataLoader
 class pipeline: 
     def __init__(self):
         self.usable = {}
+
         """
         sequence of transformations to apply to each image in a random order
         certain transformations have probability parameters.
-        we can make this much more complicated if we want to
+        TODO: play around with iaa.Clouds augmentation
         """
         self.seq = iaa.Sequential([
-            iaa.Affine(rotate=(-25,25)),
-            iaa.Fliplr(p=0.5),
-            iaa.Flipud(p=0.5)],
+        	iaa.SomeOf(4, [
+        		iaa.Grayscale(alpha=(0.0, 1.0)),
+        		iaa.MultiplyHueAndSaturation((0.5, 1.5), per_channel=True),
+        		iaa.Fliplr(p=0.5),
+        		iaa.Flipud(p=0.5),
+        		iaa.Affine(rotate=(-10,10), mode='symmetric'),
+        		iaa.SaltAndPepper(0.1, per_channel=True),
+        		iaa.OneOf([
+        			iaa.GaussianBlur(sigma=(0.0,2.0)),
+        			iaa.Sharpen(alpha=(0.0,0.75))
+        			]),
+        		iaa.Noop(),
+        		iaa.Noop(),
+        		]),
+        	],
             random_order=True)
 
     def add_to_dict(self,d, k, v):
@@ -73,7 +86,7 @@ class pipeline:
         image_aug, mask_aug = transformation(image=img, segmentation_maps=mask)
         return image_aug, mask_aug.get_arr()
 
-    def splice(self,  dir_name, filename, image_aug, mask_aug, dim):
+    def splice(self, dir_name, filename, image_aug, mask_aug, dim):
         dir_name+'/'+filename[:-9]+'_sat.jpg'
         s = len(image_aug)
         while s > dim:
@@ -100,7 +113,7 @@ def main(argv):
             if kept:
                 if random.randint(0,101) <= 10:
                     image_aug, mask_aug = p.augment(p.seq, dir_name, filename)
-                    p.splice( dir_name, filename, image_aug, mask_aug, 1000)
+                    p.splice(dir_name, filename, image_aug, mask_aug, 1000)
                     #cv2.imwrite('./image_aug/' + filename[:-4] + '_aug.png', image_aug)
                     #cv2.imwrite('./mask_aug/' + filename[:-4] + '_mask_aug.png', mask_aug)
                     #cv2.imwrite(dir_name+ '/' + filename[:-4] + '_aug.jpg', image_aug)
