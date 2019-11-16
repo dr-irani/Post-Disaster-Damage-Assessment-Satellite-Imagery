@@ -11,10 +11,21 @@ from torch.utils.data import Dataset, DataLoader
 class pipeline: 
     def __init__(self):
         self.usable = {}
+        """
+        sequence of transformations to apply to each image in a random order
+        certain transformations have probability parameters.
+        we can make this much more complicated if we want to
+        """
+        self.seq = iaa.Sequential([
+            iaa.Affine(rotate=(-25,25)),
+            iaa.Fliplr(p=0.5),
+            iaa.Flipud(p=0.5)],
+            random_order=True)
 
     def add_to_dict(self,d, k, v):
         if k in d:
             cur_usable = d[k]
+            cur_usable.append(v)
             d[k] = cur_usable
         else:
             d[k]=[v]
@@ -40,22 +51,10 @@ class pipeline:
         total_road = np.sum(gray_image)
         #print(total_road)
         total_percent = total_road / total_size 
-        #print(total_percent)
         if total_percent > threshold: 
-            self.usable = self.add_to_dict(self.usable, classname, img_name)
+            self.usable = self.add_to_dict(self.usable, classname, img_name[:-4] + '_aug.png')
             return True
         return False
-
-    """
-    sequence of transformations to apply to each image in a random order
-    certain transformations have probability parameters.
-    we can make this much more complicated if we want to
-    """
-    seq = iaa.Sequential([
-        iaa.Affine(rotate=(-25,25)),
-        iaa.Fliplr(p=0.5),
-        iaa.Flipud(p=0.5)],
-        random_order=True)
 
     """
     takes name of binary image and applies a given sequence of transformations.
@@ -64,28 +63,50 @@ class pipeline:
     returns the transformed version of the image and its mask as arrays
     """
     def augment(self, transformation, dir_name, img_name):
-        img = cv2.imread(dir_name+'/image/'+img_name, cv2.IMREAD_GRAYSCALE)
-        mask = cv2.imread(dir_name+'/mask/'+img_name[:-4]+'_mask.png', cv2.IMREAD_GRAYSCALE)
-        mask = SegmentationMapsOnImage(mask, shape=img.shape)
+        img = cv2.imread(dir_name+'/'+img_name[:-9]+'_sat.jpg', cv2.IMREAD_GRAYSCALE)
+        mask = cv2.imread(dir_name+'/'+img_name, cv2.IMREAD_GRAYSCALE)
+        print(type(img))
+        print(type(mask))
+
+        mask = SegmentationMapsOnImage(mask, shape=(len(mask), len(mask[0])))
 
         image_aug, mask_aug = transformation(image=img, segmentation_maps=mask)
         return image_aug, mask_aug.get_arr()
 
+    def splice(self,  dir_name, filename, image_aug, mask_aug, dim):
+        dir_name+'/'+filename[:-9]+'_sat.jpg'
+        s = len(image_aug)
+        while s > dim:
+            s = s / 2
+        s = int(s)
+        for i in range(int(len(image_aug)/s)):
+            for j in range(int(len(image_aug[0])/s)):
+                cv2.imwrite(dir_name+ '/' + filename[:-9] + '_sat_aug_' +str(i) +'.jpg', image_aug[s*i:s * (i+1), s*j:s * (j+1)])
+                cv2.imwrite(dir_name+ '/' + filename[:-4] + '_aug_' +str(i) +'.png', mask_aug[s*i:s * (i+1), s*j:s * (j+1)])
 
 def main(argv):
     dir_name = argv[0]
     directory = os.fsencode(dir_name)
     p = pipeline()
 
-    for file in os.listdir(os.fsencode(dir_name + '/image')):
+    for file in os.listdir(os.fsencode(dir_name)):
         filename = os.fsdecode(file)
-        if filename.endswith(".png"):
-            if p.density_filter(dir_name + '/image', 0.01, dir_name+'/image/'+filename):
+        if filename.endswith(".png") and 'mask' in filename:
+            kept = False 
+            if 'roads' in dir_name: 
+                kept = p.density_filter('roads', 0.01, dir_name+'/'+filename)
+            else:
+                kept = p.density_filter('buildings', 0.01, dir_name+'/'+filename)
+            if kept:
                 if random.randint(0,101) <= 10:
                     image_aug, mask_aug = p.augment(p.seq, dir_name, filename)
-                    cv2.imwrite(dir_name+'/image_aug/' + filename[:-4] + '_aug.png', image_aug)
-                    cv2.imwrite(dir_name+'/mask_aug/' + filename[:-4] + '_mask_aug.png', mask_aug)
-    print(p.usable)
+                    p.splice( dir_name, filename, image_aug, mask_aug, 1000)
+                    #cv2.imwrite('./image_aug/' + filename[:-4] + '_aug.png', image_aug)
+                    #cv2.imwrite('./mask_aug/' + filename[:-4] + '_mask_aug.png', mask_aug)
+                    #cv2.imwrite(dir_name+ '/' + filename[:-4] + '_aug.jpg', image_aug)
+                    #cv2.imwrite(dir_name+ '/' + filename[:-4] + '_aug.png', mask_aug)
+
+    #print(p.usable)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
