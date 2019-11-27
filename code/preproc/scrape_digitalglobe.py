@@ -94,19 +94,15 @@ def compress_tif(original_tif, compression_method="JPEG",
         os.system(command_rm)
 
 
-# def download_images()
-
-
 def retrieve_images(events, overwrite_if_exists=False):
-    # import pdb; pdb.set_trace()
     for date, urls in events.items():
+        if date == '2017-09-05' or date == '2017-09-10': continue
         if not os.path.isdir('%s' % date):
             os.mkdir('%s' % date)
         os.chdir('%s' % date)
         print('Downloading images from {}'.format(date))
         for i, url in enumerate(urls):
             filename = url[url.rfind("/")+1:]
-            # import pdb; pdb.set_trace()
             compressed_file_name = filename.split('.')[0] + '_jpeg_compressed.tif'
             if overwrite_if_exists or not os.path.isfile(compressed_file_name):
                 urlretrieve(url, filename)
@@ -114,15 +110,7 @@ def retrieve_images(events, overwrite_if_exists=False):
                 compress_tif(os.path.join(os.getcwd(), filename))
                 print('compressed file: {}'.format(filename))
         os.chdir('..')
-        # import pdb; pdb.set_trace()
-        
-
-
-    # for fileUrl in urls:
-    #     filename = fileUrl[fileUrl.rfind("/")+1:]
-    #     if overwrite_if_exists or not os.path.isfile(filename):
-    #         urllib.request.urlretrieve(fileUrl, filename)
-    #         print('downloaded file: {}'.format(filename))
+        print()
 
 
 def main():
@@ -130,8 +118,11 @@ def main():
     links = get_img_links(os.path.join(args.event_url))
     pre_events, post_events = get_img_by_date(links)
     os.chdir('/Volumes/ExtremeSSD/cs461_final_project/data/disaster_images/pre_event')
+    print("Processing Pre-Events")
     retrieve_images(pre_events)
-
+    os.chdir('../post_event')
+    print("Processing Post-Events")
+    retrieve_images(post_events)
 
 
 if __name__ == "__main__":
