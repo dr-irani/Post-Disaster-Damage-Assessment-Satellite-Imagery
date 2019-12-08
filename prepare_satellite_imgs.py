@@ -13,6 +13,8 @@ def get_args():
     parser.add_argument("post_date", help="Date of post-event")
     parser.add_argument("directory", help="Image directory")
     parser.add_argument("-dimension", help="Tiled image dimension", default=512, required=False)
+    parser.add_argument("-factor", help="Contrast factor", default=100, required=False)
+    parser.add_argument("-c", help="Add contrast", default=False, required=False)
     parser.add_argument("-s", help="Splice images", default=False, required=False)
     args = parser.parse_args()
     return args
@@ -25,13 +27,20 @@ def get_splice_factor(img, dimension):
     return int(s)
 
 
-def splice(directory, fname, dimension, img):
+def change_contrast(img, factor):
+    factor = (259 * (level + 255)) / (255 * (259 - level))
+    def contrast(c):
+        return 128 + factor * (c - 128)
+    return img.point(contrast)
+
+
+def splice(directory, fname, dimension, add_contrast, factor, img):
     s = get_splice_factor(img, dimension)
     for i in range(int(len(img)/s)):
         for j in range(int(len(img[0])/s)):
-            # print(i, j, s)
-            # print(s*i, s * (i+1), s*j, s * (j+1))
-            cv2.imwrite(os.path.join(directory, 'tiled/') + fname + '_' + str(s*i + j) + '.tif', img[s*i:s * (i+1), s*j:s * (j+1)])
+            img = img[s*i:s * (i+1), s*j:s * (j+1)]
+            if add_contrast: img = change_contrast(img, factor)
+            cv2.imwrite(os.path.join(directory, 'tiled/') + fname + '_' + str(s*i + j) + '.tif', img)
 
 
 def main():
@@ -39,8 +48,8 @@ def main():
     if args.s:
         img1 = cv2.imread(os.path.join(args.directory, 'pre_event', args.pre_date, args.img1) + '_jpeg_compressed.tif', cv2.IMREAD_COLOR)
         img2 = cv2.imread(os.path.join(args.directory, 'post_event', args.post_date, args.img2) + '_jpeg_compressed.tif', cv2.IMREAD_COLOR)
-        splice(os.path.join(args.directory, 'pre_event', args.pre_date), args.img1, args.dimension, img1)
-        splice(os.path.join(args.directory, 'post_event', args.post_date), args.img2, args.dimension, img2)
+        splice(os.path.join(args.directory, 'pre_event', args.pre_date), args.img1, args.dimension, args.c, args.factor, img1)
+        splice(os.path.join(args.directory, 'post_event', args.post_date), args.img2, args.dimension, args.c, args.factor, img2)
 
     pre_events = [f for f in os.listdir(os.path.join(args.directory, 'pre_event', args.pre_date, 'tiled')) if not f.startswith('._')]
     post_events = [f for f in os.listdir(os.path.join(args.directory, 'post_event', args.post_date, 'tiled')) if not f.startswith('._')]
