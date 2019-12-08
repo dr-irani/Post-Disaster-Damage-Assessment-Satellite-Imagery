@@ -29,7 +29,9 @@ def splice(directory, fname, dimension, img):
     s = get_splice_factor(img, dimension)
     for i in range(int(len(img)/s)):
         for j in range(int(len(img[0])/s)):
-            cv2.imwrite(os.path.join(directory, 'tiled/') + fname + '_' + str(i) + '.tif', img[s*i:s * (i+1), s*j:s * (j+1)])
+            # print(i, j, s)
+            # print(s*i, s * (i+1), s*j, s * (j+1))
+            cv2.imwrite(os.path.join(directory, 'tiled/') + fname + '_' + str(s*i + j) + '.tif', img[s*i:s * (i+1), s*j:s * (j+1)])
 
 
 def main():
