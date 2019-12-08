@@ -41,7 +41,7 @@ def main():
         splice(os.path.join(args.directory, 'post_event', args.post_date), args.img2, args.dimension, img2)
 
     pre_events = [f for f in os.listdir(os.path.join(args.directory, 'pre_event', args.pre_date, 'tiled')) if not f.startswith('._')]
-    post_events = [f for f in os.listdir(os.path.join(args.directory, 'pre_event', args.pre_date, 'tiled')) if not f.startswith('._')]
+    post_events = [f for f in os.listdir(os.path.join(args.directory, 'post_event', args.post_date, 'tiled')) if not f.startswith('._')]
     events = list(zip(pre_events, post_events))
     
     for i, j in events:

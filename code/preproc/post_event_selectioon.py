@@ -30,8 +30,8 @@ def get_img_by_date(links):
         event = url.path.split('/')[2]
         date = url.path.split('/')[3]
         code = url.path.split('/')[4]
-        if 'pre-event' in event and code == '103001004F0AF500': pre_events[date].append(link)
-        elif 'post-event' in event and code == '10300100728F1700': post_events[date].append(link)
+        if 'pre-event' in event and code == '1050010007064100': pre_events[date].append(link)
+        elif 'post-event' in event and code == '1030010072069C00': post_events[date].append(link)
 
     return pre_events, post_events
 
@@ -48,7 +48,7 @@ def main():
         img_names.append(name + '_jpeg_compressed.tif')
     os.chdir('/Volumes/ExtremeSSD/cs461_final_project/data/disaster_images/post_event/2017-09-24/')
     for img in img_names:
-        os.system('cp ' + os.path.join(os.getcwd(), img) + ' ../../manually_selected/post_event/2017-09-24/')
+        os.system('cp ' + os.path.join(os.getcwd(), img) + ' ../../manually_selected/post_event/2017-09-24_2/')
     # os.chdir('/Volumes/ExtremeSSD/cs461_final_project/data/disaster_images/manually_selected/post_event')
     # retrieve_images(pre_events)
     # os.chdir('../post_event')
