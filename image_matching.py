@@ -1,10 +1,11 @@
 import numpy as np
 import cv2
 import sys
+import os
 # import pdb; pdb.set_trace()
 
 
-def run_sift(color1,color2):
+def run_sift(color1,color2,output_dir,fname1,fname2):
     img1 = cv2.cvtColor(color1, cv2.COLOR_BGR2GRAY)
     img2 = cv2.cvtColor(color2, cv2.COLOR_BGR2GRAY)
 
@@ -14,8 +15,8 @@ def run_sift(color1,color2):
 
     output1 = cv2.drawKeypoints(color1,kp1,None,flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
     output2 = cv2.drawKeypoints(color2,kp2,None,flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
-    cv2.imwrite('siftoutput/output1.jpg',output1)
-    cv2.imwrite('siftoutput/output2.jpg',output2)
+    cv2.imwrite(os.path(output_dir, fname1) + '_features.tif', output1)
+    cv2.imwrite(os.path(output_dir, fname2) + '_features.tif', output2)
 
     bf = cv2.BFMatcher(normType=cv2.NORM_L2)
     matches = bf.knnMatch(des1, des2, k=2)
@@ -27,7 +28,7 @@ def run_sift(color1,color2):
     sortedgood = sorted(good, key = lambda x:x.distance)
     draw = sortedgood[:20]
     output3 = cv2.drawMatches(color1,kp1,color2,kp2,draw,None,flags=2)
-    cv2.imwrite('siftoutput/output3.jpg',output3)
+    cv2.imwrite(os.path(output_dir, fname1) + '_matches.tif', output3)
 
     if len(good) >= 4:
         src_pts = np.float32([ kp1[m.queryIdx].pt for m in good ]).reshape(-1,1,2)
@@ -39,7 +40,7 @@ def run_sift(color1,color2):
     H = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC,5.0)[0]
     dst = cv2.warpPerspective(color2, H, (img1.shape[1] + img2.shape[1], img1.shape[0]))
     dst[0:img1.shape[0], 0:img1.shape[1]] = color1
-    cv2.imwrite('siftoutput/stitched.jpg',dst)
+    cv2.imwrite(os.path(output_dir, fname1) + '_stitched.tif', dst)
 
 
 def main(argv):
