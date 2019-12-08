@@ -12,9 +12,8 @@ class pipeline:
         self.usable = {}
 
         """
-        sequence of transformations to apply to each image in a random order
+        sequence of geometrical transformations to apply to each image in a random order.
         certain transformations have probability parameters.
-        TODO: play around with iaa.Clouds augmentation
         """
         self.seq = iaa.Sequential([
         	iaa.SomeOf((0,3), [
@@ -27,14 +26,14 @@ class pipeline:
         	],
             random_order=True)
 
-        self.noise = iaa.Sequential([
-            iaa.OneOf([
+        """
+        three options for adding noise. should only be applied to images, not masks.
+        """
+        self.noise = iaa.OneOf([
                 iaa.SaltAndPepper(0.1, per_channel=True),
                 iaa.GaussianBlur(sigma=(0.0,2.0)),
                 iaa.Sharpen(alpha=(0.0,0.75))
-                ])
-            ],
-            random_order=True)
+            ])
 
     def add_to_dict(self,d, k, v):
         if k in d:
@@ -72,7 +71,7 @@ class pipeline:
 
     """
     takes name of binary image and applies a given sequence of transformations.
-    'transformation' parameter is an imgaug Sequential object.
+    'seq' and 'noise' parameters are imgaug Sequential objects.
     dir_name is the parent directory (e.g. train or test)
     returns the transformed version of the image and its mask as arrays
     """
@@ -90,7 +89,7 @@ class pipeline:
             image_aug = noise.augment_image(image=img)
             mask_aug = mask
 
-        return image_aug, mask_aug.get_arr()
+        return image_aug, mask_aug
 
     def splice(self, dir_name, filename, image_aug, mask_aug, dim):
         dir_name+'/'+filename[:-9]+'_sat.jpg'
