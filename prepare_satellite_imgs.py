@@ -56,7 +56,8 @@ def main():
         img2 = cv2.imread(os.path.join(post_dir, 'tiled', j), cv2.IMREAD_COLOR)
         try:
             run_sift(img1, img2, os.path.join(pre_dir, 'matches'), os.path.join(post_dir, 'matches'), i.split('.')[0], j.split('.')[0])
-        except: continue
+        except:
+            continue
 
 if __name__ == '__main__':
     main()
