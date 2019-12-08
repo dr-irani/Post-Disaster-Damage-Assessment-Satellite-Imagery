@@ -25,12 +25,13 @@ def run_sift(color1,color2):
     output3 = cv2.drawMatches(color1,kp1,color2,kp2,good,None,flags=2)
     cv2.imwrite('siftoutput/output3.jpg',output3)
 
+    src_pts = np.float32([ kp1[m.queryIdx].pt for m in good ]).reshape(-1,1,2)
+    dst_pts = np.float32([ kp2[m.trainIdx].pt for m in good ]).reshape(-1,1,2)
 
-def run_stitcher(color1, color2):
-    stitcher = cv2.createStitcher()
-    images = [color1, color2]
-    (status, stitched) = stitcher.stitch(images)
-    cv2.imwrite('siftoutput/stitched.jpg',stitched)
+    H, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC,5.0)
+    dst = cv2.warpPerspective(color2,H,(img1.shape[1] + img2.shape[1], img1.shape[0]))
+    dst[0:img1.shape[0], 0:img1.shape[1]] = color1
+    cv2.imwrite('siftoutput/stitched.jpg',dst)
 
 
 def main(argv):
@@ -40,8 +41,6 @@ def main(argv):
     color2 = cv2.imread(img2path, cv2.IMREAD_COLOR)
 
     run_sift(color1,color2)
-    run_stitcher(color1,color2)
-
 
 
 if __name__ == '__main__':
