@@ -32,18 +32,13 @@ def splice(directory, fname, dimension, img):
             cv2.imwrite(os.path.join(directory, 'tiled/') + fname + '_' + str(i) + '.tif', img[s*i:s * (i+1), s*j:s * (j+1)])
 
 
-def splice_images(args, img_color1, img_color2):
-    splice(os.path.join(args.directory, 'pre_event', args.pre_date), args.img1, args.dimension, img_color1)
-    splice(os.path.join(args.directory, 'post_event', args.post_date), args.img2, args.dimension, img_color2)
-
-
-
 def main():
     args = get_args()
     if args.s:
         img1 = cv2.imread(os.path.join(args.directory, 'pre_event', args.pre_date, args.img1) + '_jpeg_compressed.tif', cv2.IMREAD_COLOR)
         img2 = cv2.imread(os.path.join(args.directory, 'post_event', args.post_date, args.img2) + '_jpeg_compressed.tif', cv2.IMREAD_COLOR)
-        splice_images(args, img1, img2)
+        splice(os.path.join(args.directory, 'pre_event', args.pre_date), args.img1, args.dimension, img1)
+        splice(os.path.join(args.directory, 'post_event', args.post_date), args.img2, args.dimension, img2)
 
     pre_events = [f for f in os.listdir(os.path.join(args.directory, 'pre_event', args.pre_date, 'tiled')) if not f.startswith('._')]
     post_events = [f for f in os.listdir(os.path.join(args.directory, 'pre_event', args.pre_date, 'tiled')) if not f.startswith('._')]
