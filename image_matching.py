@@ -17,19 +17,27 @@ def run_sift(color1,color2):
     cv2.imwrite('siftoutput/output1.jpg',output1)
     cv2.imwrite('siftoutput/output2.jpg',output2)
 
-    bf = cv2.BFMatcher(normType=cv2.NORM_L2, crossCheck=True)
-    matches = bf.match(des1, des2)
-    matches = sorted(matches, key = lambda x:x.distance)
-    good = matches[:20]
+    bf = cv2.BFMatcher(normType=cv2.NORM_L2)
+    matches = bf.knnMatch(des1, des2, k=2)
+    good = []
+    for m,n in matches:
+        if m.distance < 0.5*n.distance:
+            good.append(m)
 
-    output3 = cv2.drawMatches(color1,kp1,color2,kp2,good,None,flags=2)
+    sortedgood = sorted(good, key = lambda x:x.distance)
+    draw = sortedgood[:20]
+    output3 = cv2.drawMatches(color1,kp1,color2,kp2,draw,None,flags=2)
     cv2.imwrite('siftoutput/output3.jpg',output3)
 
-    src_pts = np.float32([ kp1[m.queryIdx].pt for m in good ]).reshape(-1,1,2)
-    dst_pts = np.float32([ kp2[m.trainIdx].pt for m in good ]).reshape(-1,1,2)
+    if len(good) >= 4:
+        src_pts = np.float32([ kp1[m.queryIdx].pt for m in good ]).reshape(-1,1,2)
+        dst_pts = np.float32([ kp2[m.trainIdx].pt for m in good ]).reshape(-1,1,2)
+    else:
+        print('NOT ENOUGH MATCHES FOR HOMOGRAPHY')
+        return
 
-    H, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC,5.0)
-    dst = cv2.warpPerspective(color2,H,(img1.shape[1] + img2.shape[1], img1.shape[0]))
+    H = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC,5.0)[0]
+    dst = cv2.warpPerspective(color2, H, (img1.shape[1] + img2.shape[1], img1.shape[0]))
     dst[0:img1.shape[0], 0:img1.shape[1]] = color1
     cv2.imwrite('siftoutput/stitched.jpg',dst)
 
