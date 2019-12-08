@@ -15,20 +15,20 @@ def run_sift(color1,color2,dir1,dir2,fname1,fname2):
 
     output1 = cv2.drawKeypoints(color1,kp1,None,flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
     output2 = cv2.drawKeypoints(color2,kp2,None,flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
-    cv2.imwrite(os.path(dir1, fname1) + '_features.tif', output1)
-    cv2.imwrite(os.path(dir2, fname2) + '_features.tif', output2)
+    cv2.imwrite(os.path.join(dir1, fname1) + '_features.tif', output1)
+    cv2.imwrite(os.path.join(dir2, fname2) + '_features.tif', output2)
 
     bf = cv2.BFMatcher(normType=cv2.NORM_L2)
     matches = bf.knnMatch(des1, des2, k=2)
     good = []
     for m,n in matches:
-        if m.distance < 0.5*n.distance:
+        if m.distance < n.distance:
             good.append(m)
 
     sortedgood = sorted(good, key = lambda x:x.distance)
     draw = sortedgood[:20]
     output3 = cv2.drawMatches(color1,kp1,color2,kp2,draw,None,flags=2)
-    cv2.imwrite(os.path(dir2, fname2) + '_matches.tif', output3)
+    cv2.imwrite(os.path.join(dir2, fname2) + '_matches.tif', output3)
 
     if len(good) >= 4:
         src_pts = np.float32([ kp1[m.queryIdx].pt for m in good ]).reshape(-1,1,2)
@@ -40,7 +40,7 @@ def run_sift(color1,color2,dir1,dir2,fname1,fname2):
     H = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC,5.0)[0]
     dst = cv2.warpPerspective(color2, H, (img1.shape[1] + img2.shape[1], img1.shape[0]))
     dst[0:img1.shape[0], 0:img1.shape[1]] = color1
-    cv2.imwrite(os.path(dir2, fname2) + '_stitched.tif', dst)
+    cv2.imwrite(os.path.join(dir2, fname2) + '_stitched.tif', dst)
 
 
 def main(argv):

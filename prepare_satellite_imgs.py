@@ -54,7 +54,9 @@ def main():
         post_dir = os.path.join(args.directory, 'post_event', args.post_date)
         img1 = cv2.imread(os.path.join(pre_dir, 'tiled', i), cv2.IMREAD_COLOR)
         img2 = cv2.imread(os.path.join(post_dir, 'tiled', j), cv2.IMREAD_COLOR)
-        run_sift(img1, img2, os.path.join(pre_dir, 'matches'), os.path.join(post_dir, 'matches'), i.split('.')[0], j.split('.')[0])
+        try:
+            run_sift(img1, img2, os.path.join(pre_dir, 'matches'), os.path.join(post_dir, 'matches'), i.split('.')[0], j.split('.')[0])
+        except: continue
 
 if __name__ == '__main__':
     main()
