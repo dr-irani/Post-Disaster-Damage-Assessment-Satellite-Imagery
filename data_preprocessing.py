@@ -3,7 +3,6 @@ import numpy as np
 import sys, os
 import random
 from imgaug import augmenters as iaa
-from imgaug.augmentables.segmaps import SegmentationMapsOnImage
 import torchvision.transforms.functional as TF
 from torch.utils.data import Dataset, DataLoader
 
@@ -18,21 +17,23 @@ class pipeline:
         TODO: play around with iaa.Clouds augmentation
         """
         self.seq = iaa.Sequential([
-        	iaa.SomeOf(4, [
+        	iaa.SomeOf((0,3), [
         		iaa.Grayscale(alpha=(0.0, 1.0)),
         		iaa.MultiplyHueAndSaturation((0.5, 1.5), per_channel=True),
         		iaa.Fliplr(p=0.5),
         		iaa.Flipud(p=0.5),
         		iaa.Affine(rotate=(-10,10), mode='symmetric'),
-        		iaa.SaltAndPepper(0.1, per_channel=True),
-        		iaa.OneOf([
-        			iaa.GaussianBlur(sigma=(0.0,2.0)),
-        			iaa.Sharpen(alpha=(0.0,0.75))
-        			]),
-        		iaa.Noop(),
-        		iaa.Noop(),
         		]),
         	],
+            random_order=True)
+
+        self.noise = iaa.Sequential([
+            iaa.OneOf([
+                iaa.SaltAndPepper(0.1, per_channel=True),
+                iaa.GaussianBlur(sigma=(0.0,2.0)),
+                iaa.Sharpen(alpha=(0.0,0.75))
+                ])
+            ],
             random_order=True)
 
     def add_to_dict(self,d, k, v):
@@ -75,15 +76,20 @@ class pipeline:
     dir_name is the parent directory (e.g. train or test)
     returns the transformed version of the image and its mask as arrays
     """
-    def augment(self, transformation, dir_name, img_name):
+    def augment(self, seq, noise, dir_name, img_name):
         img = cv2.imread(dir_name+'/'+img_name[:-9]+'_sat.jpg', cv2.IMREAD_GRAYSCALE)
         mask = cv2.imread(dir_name+'/'+img_name, cv2.IMREAD_GRAYSCALE)
         print(type(img))
         print(type(mask))
 
-        mask = SegmentationMapsOnImage(mask, shape=(len(mask), len(mask[0])))
+        if random.randint(0,2) == 1:
+            seq_det = seq.to_deterministic()
+            image_aug = seq_det.augment_image(image=img)
+            mask_aug = seq_det.augment_image(image=mask)
+        else:
+            image_aug = noise.augment_image(image=img)
+            mask_aug = mask
 
-        image_aug, mask_aug = transformation(image=img, segmentation_maps=mask)
         return image_aug, mask_aug.get_arr()
 
     def splice(self, dir_name, filename, image_aug, mask_aug, dim):
@@ -112,12 +118,12 @@ def main(argv):
                 kept = p.density_filter('buildings', 0.01, dir_name+'/'+filename)
             if kept:
                 if random.randint(0,101) <= 10:
-                    image_aug, mask_aug = p.augment(p.seq, dir_name, filename)
+                    image_aug, mask_aug = p.augment(p.seq, p.noise, dir_name, filename)
                     p.splice(dir_name, filename, image_aug, mask_aug, 1000)
-                    #cv2.imwrite('./image_aug/' + filename[:-4] + '_aug.png', image_aug)
-                    #cv2.imwrite('./mask_aug/' + filename[:-4] + '_mask_aug.png', mask_aug)
-                    #cv2.imwrite(dir_name+ '/' + filename[:-4] + '_aug.jpg', image_aug)
-                    #cv2.imwrite(dir_name+ '/' + filename[:-4] + '_aug.png', mask_aug)
+                    # cv2.imwrite('./image_aug/' + filename[:-4] + '_aug.png', image_aug)
+                    # cv2.imwrite('./mask_aug/' + filename[:-4] + '_mask_aug.png', mask_aug)
+                    # cv2.imwrite(dir_name+ '/' + filename[:-4] + '_aug.jpg', image_aug)
+                    # cv2.imwrite(dir_name+ '/' + filename[:-4] + '_aug.png', mask_aug)
 
     #print(p.usable)
 
