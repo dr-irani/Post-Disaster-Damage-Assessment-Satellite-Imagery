@@ -34,13 +34,14 @@ def change_contrast(img, factor):
     return img.point(contrast)
 
 
-def splice(directory, fname, dimension, add_contrast, factor, img):
-    s = get_splice_factor(img, dimension)
+def splice(directory, fname, s, add_contrast, factor, img):
+    # s = get_splice_factor(img, dimension)
     for i in range(int(len(img)/s)):
         for j in range(int(len(img[0])/s)):
-            img = img[s*i:s * (i+1), s*j:s * (j+1)]
-            if add_contrast: img = change_contrast(img, factor)
-            cv2.imwrite(os.path.join(directory, 'tiled/') + fname + '_' + str(s*i + j) + '.tif', img)
+            if s * (i+1) < len(img) and s * (j+1) < len(img[1]):
+                img = img[s*i:s * (i+1), s*j:s * (j+1)]
+                if add_contrast: img = change_contrast(img, factor)
+                cv2.imwrite(os.path.join(directory, 'tiled/') + fname + '_' + str(s*i + j) + '.tif', img)
 
 
 def main():
