@@ -17,7 +17,6 @@ class pipeline:
         """
         self.seq = iaa.Sequential([
         	iaa.SomeOf((0,3), [
-        		iaa.Grayscale(alpha=(0.0, 1.0)),
         		iaa.MultiplyHueAndSaturation((0.5, 1.5), per_channel=True),
         		iaa.Fliplr(p=0.5),
         		iaa.Flipud(p=0.5),
@@ -76,10 +75,8 @@ class pipeline:
     returns the transformed version of the image and its mask as arrays
     """
     def augment(self, seq, noise, dir_name, img_name):
-        img = cv2.imread(dir_name+'/'+img_name[:-9]+'_sat.jpg', cv2.IMREAD_GRAYSCALE)
-        mask = cv2.imread(dir_name+'/'+img_name, cv2.IMREAD_GRAYSCALE)
-        print(type(img))
-        print(type(mask))
+        img = cv2.imread(dir_name+'/'+img_name[:-9]+'_sat.jpg', cv2.IMREAD_COLOR)
+        mask = cv2.imread(dir_name+'/'+img_name, cv2.IMREAD_COLOR)
 
         if random.randint(0,2) == 1:
             seq_det = seq.to_deterministic()
@@ -118,11 +115,18 @@ def main(argv):
             if kept:
                 if random.randint(0,101) <= 10:
                     image_aug, mask_aug = p.augment(p.seq, p.noise, dir_name, filename)
-                    p.splice(dir_name, filename, image_aug, mask_aug, 1000)
-                    # cv2.imwrite('./image_aug/' + filename[:-4] + '_aug.png', image_aug)
-                    # cv2.imwrite('./mask_aug/' + filename[:-4] + '_mask_aug.png', mask_aug)
+                    # p.splice(dir_name, filename, image_aug, mask_aug, 1000)
+                    print('writing augmented')
+                    cv2.imwrite(dir_name + '/output/' + filename[:-9] + '_sat_aug.jpg', image_aug)
+                    cv2.imwrite(dir_name + '/output/' + filename[:-4] + '_aug.png', mask_aug)
                     # cv2.imwrite(dir_name+ '/' + filename[:-4] + '_aug.jpg', image_aug)
                     # cv2.imwrite(dir_name+ '/' + filename[:-4] + '_aug.png', mask_aug)
+                else:
+                    print('writing non-augmented')
+                    image = cv2.imread(dir_name+'/'+filename[:-9]+'_sat.jpg', cv2.IMREAD_COLOR)
+                    cv2.imwrite(dir_name + '/output/' + filename[:-9] + '_sat.jpg', image)
+                    mask = cv2.imread(dir_name+'/'+filename, cv2.IMREAD_COLOR)
+                    cv2.imwrite(dir_name + '/output/' + filename[:-4] + '.png', mask)
 
     #print(p.usable)
 
