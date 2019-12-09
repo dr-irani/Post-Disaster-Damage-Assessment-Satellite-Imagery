@@ -1,60 +1,37 @@
-# CS447 Final Project:
+# CS461 Final Project:
 
 ## Repository Organization
-    cs447-final-project/
+    cs461-final-project/
       |- README.md
-      |- minhash_combined.py --> source code for all MinHash implementations/modifications
-      |- edit_distance_DP.py --> Needleman-Wunsch implementation (Provided in lecture)
-      |- generate_data.py --> For generating synthetic reads and inserting edits to given sequence
-      |- make_synth_data.py --> Script that calls generate_data.py and generates random samples used in our analysis
-      |- process_fastq.py --> For extracting only the sequences from the PACBIO .fastq file
-      |- profiler.py --> code for running time benchmarks for each MinHash implementation
-      |- run_DP.py --> Runs edit_distance_DP.py for the all sequence pairs
-      |- run_experiment.py --> Calculates estimated edit distance using the computed Jaccard similarities
-      |- tune_parameters.py --> Iterates through combinations of k and L pairs to compute Jaccard similarity
-      |- data/
-         |- README.md
-         |- ...
+      |- post_event_selection.py --> 
+      |- retrieve_ground_truth.py --> 
+      |- scrape_digitalglobe.py --> 
+      |- split_data.py --> 
+      |- calculate_per_pixel_change.py --> 
+      |- data_preprocessing.py --> Apply density filter and image augmentation to training dataset
+      |- image_matching.py --> Perform SURF feature matching and perspective transformation for pre and post image matching
+      |- prepare_satellite_imgs.py --> 
+      |- unet.py --> 
       |- notebooks/
-         |- ...
-      |- output/
-         |- ...
-      |- profile_out/
-         |- ...
-      |- synth_data/
-         |- ...
-      |- synth_out/
-         |- ...
-      |- tuning/
-         |- ecoli/
-            |- ...
-         |- synth/
-            |- ...
-         |- ...
-Source for Needleman-Wunsch Implementation:
-[Jupyter Notebook Link](https://nbviewer.jupyter.org/github/BenLangmead/comp-genomics-class/tree/master/notebooks/)
+         |- UNet.ipynb
+         |- damage_ground_truth.ipynb
+      |- data/
+         |- ground_truth
+         	|- ...
+         |- post_event
+         	|- ...
+         |- pre_event
+         	|- ...
+         |- roads
+         	|- train
+         	|- output
+         	|- ...
+## Data Preprocessing
+The directory containing the data to process is used as an argument when calling the program. Here is an example command to apply preprocessing to the `train` images in the `roads` directory.
 
-## MinHash Genomic Fingerprinting to Estimate Edit Distance
+```python data_preprocessing.py data/roads/train/```
 
-## Data Generation
-Example commands of generating synthetic reads can be found in `/data/READMEmd`. 
-
-## MinHash
-All of our implementations for MinHash are contained in `minhash_combined.py` The following parameters are used as arguments when calling the program. 
-``` 
--f1: "Path of sequence1 .txt file"
--f2: "Path of sequence2 .txt file"
--n: "Length of fingerprint"
--k: "Length of kmer"
--s: "Length of stride"
--m: "Toggle multi hash layers" (optional)
-```
-
-Here is an example command to compare files `file1` and `file2` using 128 hash functions, k-mer size 16, and stride length of 1.
-
-```python minhash_combined.py -f1=file1 -f2=file2 -method=khash -n=128 -k=16 -s=1```
-
-## Needleman-Wunsch
+## Image Matching
 `run_DP.py` is used to compute the true edit distance. The script calls `edit_distance_DP.py`.  
 - For the synthetic data, all the sequences were generated as separate .txt files. The input sequence files are in `/data/synth_*.txt`(10 pairs) and `/synth_data/synth_*.txt`(1 test and 5 edited sequences each, yields a total of 50 pairs).
 - For the genomic data, all the sequences are in `/data/ecoli_realdata.txt`. The first 600 sequences were used.

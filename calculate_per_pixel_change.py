@@ -29,8 +29,8 @@ def main():
     gray1 = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY) / 255.0
     gray2 = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY) / 255.0
     manhattan_norm, zero_norm = calculate_per_pixel_change(gray1, gray2)
-    print("Manhattan norm: {} per pizel: {}".format(manhattan_norm, manhattan_norm / cv.GetSize(gray1)))
-    print("Zero norm: {} per pizel: {}".format(zero_norm, zero_norm / cv.GetSize(gray1)))
+    print("Manhattan norm: {} per pixel: {}".format(manhattan_norm, manhattan_norm / cv.GetSize(gray1)))
+    print("Zero norm: {} per pixel: {}".format(zero_norm, zero_norm / cv.GetSize(gray1)))
 
 
 if __name__ == '__main__':
