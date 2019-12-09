@@ -52,15 +52,46 @@ def main():
         splice(os.path.join(args.directory, 'pre_event', args.pre_date), args.img1, args.dimension, args.c, args.factor, img1)
         splice(os.path.join(args.directory, 'post_event', args.post_date), args.img2, args.dimension, args.c, args.factor, img2)
 
-    img_names = ['2031101_3094.tif']
+    img_names = ['2031101_3088.tif', '2031101_4635.tif',
+'2031101_10266.tif',
+'2031101_6683.tif',
+'2031101_11803.tif',
+'2031101_10788.tif',
+'2031101_5143.tif',
+'2031101_5661.tif',
+'2031101_7184.tif',
+'2031101_8204.tif',
+'2031101_1044.tif',
+'2031101_6686.tif',
+'2031101_5657.tif',
+'2031101_7693.tif',
+'2031101_10258.tif',
+'2031101_7182.tif',
+'2031101_6684.tif',
+'2031101_11292.tif',
+'2031101_11291.tif',
+'2031101_12311.tif',
+'2031101_6688.tif',
+'2031101_10772.tif',
+'2031101_7201.tif',
+'2031101_7183.tif',
+'2031101_14.tif',
+'2031101_11281.tif',
+'2031101_10789.tif',
+'2031101_4634.tif',
+'2031101_513.tif',
+'2031101_5658.tif',
+'2031101_11285.tif']
 
-    # pre_events = [f for f in os.listdir(os.path.join(args.directory, 'pre_event/charlotte', 'tiled')) if f in img_names]
+    # pre_events = [f for f in os.listdir(os.path.join(args.directory, 'pre_event', args.pre_date, 'tiled')) if f in img_names]
     # post_events = [f for f in os.listdir(os.path.join(args.directory, 'post_event', args.post_date, 'tiled')) if f in img_names]
     pre_events = [f for f in os.listdir(os.path.join(args.directory, 'pre_event', args.pre_date, 'tiled')) if not f.startswith('._')]
     post_events = [f for f in os.listdir(os.path.join(args.directory, 'post_event', args.post_date, 'tiled')) if not f.startswith('._')]
     events = list(zip(pre_events, post_events))
 
     for i, j in events:
+        # os.system("cp " + os.path.join(args.directory, 'pre_event', args.pre_date, 'tiled/') + i + " data/pre_event")
+        # os.system("cp " + os.path.join(args.directory, 'post_event', args.post_date, 'tiled/') + j + " data/post_event")
         pre_dir = os.path.join(args.directory, 'pre_event', args.pre_date)
         post_dir = os.path.join(args.directory, 'post_event', args.post_date)
         img1 = cv2.imread(os.path.join(pre_dir, 'tiled', i), cv2.IMREAD_COLOR)
