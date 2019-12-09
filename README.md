@@ -79,4 +79,4 @@ Inside `minhash_combined.py` there are commented out `@profile` blocks. If you u
 
 
 Install requirements: pip3 install requirements.txt
-Preprocessing running: python3 data_preprocessing.py data/roads/train/train
+Preprocessing running: python3 data_preprocessing.py data/roads/train/
