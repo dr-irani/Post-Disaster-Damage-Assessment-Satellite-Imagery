@@ -1,9 +1,13 @@
+"""
+This requires an older version of OpenCV to run SURF feature detection.
+Version used: 3.4.2.
+"""
+
 import argparse
 import numpy as np
 import cv2
 import sys
 import os
-# import pdb; pdb.set_trace()
 
 def get_args():
     parser = argparse.ArgumentParser()
