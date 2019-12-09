@@ -15,15 +15,9 @@
          |- UNet.ipynb
          |- damage_ground_truth.ipynb
       |- data/
-         |- ground_truth
-         	|- ...
          |- post_event
          	|- ...
          |- pre_event
-         	|- ...
-         |- roads
-         	|- train
-         	|- output
          	|- ...
 
 
