@@ -34,7 +34,7 @@ def get_img_by_date(links):
         code = url.path.split('/')[4]
         codes = ['103001005F73E000', '1030010060C0B000', '103001006FBA7400', '1030010072823700']
         if 'pre-event' in event and code in codes: pre_events[date].append(link)
-        # elif 'post-event' in event and code == '1030010072069C00': post_events[date].append(link)
+        elif 'post-event' in event and code == '1030010072069C00': post_events[date].append(link)
 
     return pre_events, post_events
 
@@ -44,7 +44,6 @@ def main():
     links = get_img_links(os.path.join(event_url))
     pre_events, post_events = get_img_by_date(links)
     images = defaultdict(list)
-    # print(pre_events)
     for date, img_names in pre_events.items():
         print(len(img_names))
         for link in img_names:
@@ -54,8 +53,7 @@ def main():
             images[date].append(name + '_jpeg_compressed.tif')
     count = 0
     for date, img_names in images.items():
-        # print(len(img_names))
-        # import pdb; pdb.set_trace()
+
         os.chdir(os.path.join('/Volumes/ExtremeSSD/cs461_final_project/data/disaster_images/pre_event/', date))
         for img in img_names:
             count += 1

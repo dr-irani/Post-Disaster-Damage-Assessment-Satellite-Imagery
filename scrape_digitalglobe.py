@@ -10,8 +10,6 @@ from bs4 import BeautifulSoup
 def get_args():
     parser = argparse.ArgumentParser(description="Scrape GeoTIFF images from DigitalGlobe.")
     parser.add_argument('event_url', metavar='link to event on DigitalGlobe', type=str)
-    parser.add_argument('disaster_name', help='specify name of disaster to create output folder')
-    parser.add_argument('--download', metavar='testing file', default=False, type=bool)
     args = parser.parse_args()
     return args
 
@@ -39,9 +37,8 @@ def get_img_by_date(links):
         event = url.path.split('/')[2]
         date = url.path.split('/')[3]
         code = url.path.split('/')[4]
-        # if 'pre-event' in event and code == '103001004F0AF500': pre_events[date].append(link)
-        # elif 'post-event' in event and code == '10300100728F1700': post_events[date].append(link)
-        if 'post-event' in event and date == '2017-09-08' and code == '103001006FBA7400' : post_events[date].append(link)
+        if 'pre-event' in event and code == '103001004F0AF500': pre_events[date].append(link)
+        elif 'post-event' in event and code == '10300100728F1700': post_events[date].append(link)
 
     return pre_events, post_events
 
@@ -118,10 +115,9 @@ def main():
     args = get_args()
     links = get_img_links(os.path.join(args.event_url))
     pre_events, post_events = get_img_by_date(links)
-    # import pdb; pdb.set_trace()
     os.chdir('/Volumes/ExtremeSSD/cs461_final_project/data/disaster_images/manually_selected/pre_event')
     print("Processing Pre-Events")
-    # retrieve_images(pre_events)
+    retrieve_images(pre_events)
     os.chdir('../post_event')
     print("Processing Post-Events")
     retrieve_images(post_events)
