@@ -13,7 +13,7 @@
       |- prepare_satellite_imgs.py --> Apply 512x512 image tiling, (optionally) add contrast to images, and match pre-/post-images
       |- notebooks/
          |- UNet.ipynb --> not pretrained unet model
-         |- damage_ground_truth.ipynb
+         |- damage_ground_truth.ipynb --> Parse GeoJSON crowd-sourced damage labels and view/save associated image tiles
          |- data_preprocessing.ipynb --> preprocessing training data
          |- damage_ground_truth.ipynb --> same as the py file
          |- semantic_segmentation.ipynb --> unet/fpn model, change type by changing the model parameter
