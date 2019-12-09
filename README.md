@@ -12,8 +12,15 @@
       |- image_matching.py --> Perform SURF feature matching and perspective transformation for pre and post image matching
       |- prepare_satellite_imgs.py --> Apply 512x512 image tiling, (optionally) add contrast to images, and match pre-/post-images
       |- notebooks/
-         |- UNet.ipynb
+         |- UNet.ipynb --> not pretrained unet model
          |- damage_ground_truth.ipynb
+         |- data_preprocessing.ipynb --> preprocessing training data
+         |- damage_ground_truth.ipynb --> same as the py file
+         |- semantic_segmentation.ipynb --> unet/fpn model, change type by changing the model parameter
+         |- segment_satellite.ipynb --> makes prediction masks for pre-/post-event satellite images
+         |- per_pixel_overlap.ipynb --> calculates the per pixel overlaps from pre-/post-event mask
+         |- best_model_full.pth --> best model of fpn saved over 40 iterations
+         |- best_model_unet.pth --> best model of unet saved over 40 iterations
       |- data/
          |- post_event
          	|- ...
@@ -22,11 +29,13 @@
 
 
 ## Intructions for Running Satellite Image Road Segmentation Example
+1. Run through semantic_segmentation.ipynb. The current default is unet. If want to get the result for fpn, leave only ```model_path = './best_model_full.pth'``` uncommented.  
+2. Run through per_pixel_overlap.ipynb. The current default is unet. If want to get result for fpn, uncomment ``` mask_dir = '../predictions_fpn/'```
 
 ## Data Preprocessing
 The directory containing the data to process is used as an argument when calling the program. Here is an example command to apply preprocessing to the `train` images in the `roads` directory.
 
 ```python data_preprocessing.py data/roads/train/```
 
-
-Install requirements: pip3 install requirements.txt
+Install requirements: 
+```pip3 install requirements.txt```
