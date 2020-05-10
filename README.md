@@ -1,4 +1,4 @@
-# CS461 Final Project:
+# CS461 Final Project: Damage and Accessibility Assessment for Post-Disaster Regions from Satellite Imagery
 
 ## Repository Organization
     cs461-final-project/
